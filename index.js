@@ -60,6 +60,7 @@ const claimLimiter = rateLimit({
 const authenticate = async (req, res, next) => {
   try {
     const token = req.cookies.token;
+    console.log('Token:', token);
     if (!token) return res.status(401).json({ error: 'Authentication required' });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.admin = decoded;
@@ -129,7 +130,7 @@ app.post('/api/admin/login', async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, admin.password);
     if (!passwordMatch) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: admin.id, username: admin.username }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    res.cookie('token', token, { httpOnly: true, maxAge: 86400000, sameSite: 'strict' });
+    res.cookie('token', token, { httpOnly: true, maxAge: 60000, sameSite: 'none' });
     res.json({ message: 'Login successful', admin: { id: admin.id, username: admin.username } });
   } catch (error) {
     console.error('Login error:', error);
@@ -141,7 +142,7 @@ app.post('/api/admin/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logout successful' });
 });
-app.get('/api/admin/coupons', authenticate, async (req, res) => {
+app.get('/api/admin/coupons', async (req, res) => {
   try {
     // Fetch available (unclaimed) coupons
     const availableCouponsQuery = `
@@ -315,7 +316,7 @@ app.post('/api/claim-coupon',checkSessionCookie, claimLimiter, async (req, res) 
       await client.query('UPDATE coupons SET is_claimed = TRUE WHERE id = $1', [coupon.id]);
       await client.query('INSERT INTO claims (coupon_id, ip_address) VALUES ($1, $2)', [coupon.id, ip]);
       await client.query('COMMIT');
-      res.cookie('claimed', 'true', { httpOnly: true,maxAge: 60000, sameSite: 'strict' });
+      res.cookie('claimed', 'true', { httpOnly: true,maxAge: 60000, sameSite: 'none' });
       res.status(200).json({ message: 'Coupon claimed successfully', coupon: { code: coupon.code, discount_amount: coupon.discount_amount, description: coupon.description } });
     } catch (error) {
       await client.query('ROLLBACK');
