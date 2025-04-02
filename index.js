@@ -172,19 +172,20 @@ console.log(claimedCouponsResult.rows);
 });
 // 4. Add new coupon (admin only)
 app.post('/api/admin/add-coupon', 
-  authenticate,
+  // authenticate,
   body('code').isString().trim().notEmpty(),
   body('discount_amount').isNumeric(),
   body('description').isString().optional(),
-  body('is_active').isBoolean(),
+  body('isActive').isBoolean(),
   async (req, res) => {
     // Validate request
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     
-    const { code, discount_amount, description, is_active } = req.body;
+    const { code, discount_amount, description, isActive:is_active } = req.body;
     
     try {
      
@@ -213,11 +214,11 @@ app.post('/api/admin/add-coupon',
   }
 );
 app.put('/api/admin/coupons/:id', 
-  authenticate,
+  // authenticate,
   body('code').optional().isString().trim().notEmpty(),
   body('discount_amount').optional().isNumeric(),
   body('description').optional().isString(),
-  body('is_active').optional().isBoolean(),
+  body('isActive').optional().isBoolean(),
   async (req, res) => {
     // Validate request
     const errors = validationResult(req);
@@ -226,7 +227,7 @@ app.put('/api/admin/coupons/:id',
     }
 
     const { id } = req.params;
-    const { code, discount_amount, description, is_active } = req.body;
+    const { code, discount_amount, description, isActive:is_active } = req.body;
 
     try {
       // Check if coupon exists
