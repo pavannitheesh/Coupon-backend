@@ -39,7 +39,7 @@ async function getPgVersion() {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT version()');
-    console.log(result.rows[0]);
+    //console.log(result.rows[0]);
   } finally {
     client.release();
   }
@@ -60,7 +60,7 @@ const claimLimiter = rateLimit({
 const authenticate = async (req, res, next) => {
   try {
     const token = req.cookies.token;
-    console.log('Token:', token);
+    //console.log('Token:', token);
     if (!token) return res.status(401).json({ error: 'Authentication required' });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.admin = decoded;
@@ -111,9 +111,9 @@ async function initializeDatabase() {
         'INSERT INTO admins (username, password) VALUES ($1, $2)',
         ['admin', hashedPassword]
       );
-      console.log('Default admin created: username=admin, password=admin123');
+      //console.log('Default admin created: username=admin, password=admin123');
     }
-    console.log('Database initialized successfully');
+    //console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
   }
@@ -151,7 +151,7 @@ app.get('/api/admin/coupons', async (req, res) => {
       ORDER BY created_at DESC
     `;
     const availableCouponsResult = await pool.query(availableCouponsQuery);
-console.log(availableCouponsResult.rows)  
+//console.log(availableCouponsResult.rows)  
     // Fetch claimed coupons with claim details
     const claimedCouponsQuery = `
             SELECT c.*, cl.ip_address, cl.claimed_at
@@ -160,7 +160,7 @@ console.log(availableCouponsResult.rows)
       WHERE c.is_claimed = TRUE;
     `;
     const claimedCouponsResult = await pool.query(claimedCouponsQuery);
-console.log(claimedCouponsResult.rows);
+//console.log(claimedCouponsResult.rows);
     res.json({
       available_coupons: availableCouponsResult.rows,
       claimed_coupons: claimedCouponsResult.rows
@@ -295,7 +295,7 @@ app.post('/api/claim-coupon',checkSessionCookie, claimLimiter, async (req, res) 
   try {
    
     const ip = req.ip;
-    console.log("Ip address:"+ip)
+    //console.log("Ip address:"+ip)
     // const result = await pool.query(
     //   `SELECT * FROM claims WHERE ip_address = $1 AND claimed_at > NOW() - INTERVAL '24 hours'`,
     //   [ip]
@@ -332,7 +332,7 @@ app.post('/api/claim-coupon',checkSessionCookie, claimLimiter, async (req, res) 
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  //console.log(`Server is running on port ${PORT}`);
 });
 
 module.exports = app;
